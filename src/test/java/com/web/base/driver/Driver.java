@@ -9,6 +9,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+
 import java.time.Duration;
 
 
@@ -17,12 +18,16 @@ public class Driver {
     public static WebDriver webDriver;
     public static WebDriverWait webDriverWait;
 
-
     @BeforeSuite
     public void initializeDriver() {
+        System.setProperty("webdriver.chrome.driver", "web_driver/chromedriver");
         webDriver = new ChromeDriver();
 
-        webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(30));
+        long seconds = 10;
+        long milliseconds = 400;
+        long timeoutMillis = seconds * 1000 + milliseconds;
+
+        webDriverWait = new WebDriverWait(webDriver, timeoutMillis);
         webDriverWait.withTimeout(Duration.ofSeconds(30))
                 .pollingEvery(Duration.ofMillis(500))
                 .ignoring(NoSuchElementException.class)
@@ -30,8 +35,6 @@ public class Driver {
 
         webDriver.manage().window().maximize();
         webDriver.navigate().to("https://www.hurriyet.com.tr/");
-
-
     }
 
     @AfterSuite
@@ -40,8 +43,4 @@ public class Driver {
             webDriver.quit();
         }
     }
-
-
 }
-
-
