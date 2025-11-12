@@ -3,7 +3,7 @@ name: Run Gauge UI Tests
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   test:
