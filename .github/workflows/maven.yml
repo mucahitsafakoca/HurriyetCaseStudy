@@ -26,24 +26,24 @@ jobs:
 
       - name: Install compatible ChromeDriver
         run: |
-          # Chrome sürümünü al
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+' | head -1)
           echo "Detected Chrome version: $CHROME_VERSION"
 
-          # ChromeDriver sürümü (major versiyon + uyumlu minör sürüm)
           DRIVER_VERSION="142.0.7444.61"
           echo "Using ChromeDriver version: $DRIVER_VERSION"
 
-          # ChromeDriver indir ve kur
-          wget -N "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/
+          wget -N "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Install Gauge (latest stable)
         run: |
           curl -SsL https://downloads.gauge.org/stable | sudo sh
           gauge -v
+          gauge install java --version 0.11.1
+          gauge install screenshot
+          gauge install html-report
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -55,6 +55,9 @@ jobs:
 
       - name: Install dependencies
         run: mvn clean install -DskipTests
+
+      - name: Prepare logs directory
+        run: mkdir -p logs
 
       - name: Run Gauge Tests
         run: mvn test
