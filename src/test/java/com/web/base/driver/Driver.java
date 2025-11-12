@@ -1,35 +1,33 @@
 package com.web.base.driver;
 
-
-import com.thoughtworks.gauge.AfterSuite;
-import com.thoughtworks.gauge.BeforeSuite;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
+import org.testng.annotations.BeforeSuite;
 
 import java.time.Duration;
-
 
 public class Driver {
 
     public static WebDriver webDriver;
     public static WebDriverWait webDriverWait;
 
-       @BeforeSuite
+    @BeforeSuite
     public void initializeDriver() {
-        // Eğer GitHub Actions ortamındaysak (CI değişkeni her zaman set olur)
+        // GitHub Actions ortamında CI değişkeni set edilir
         String driverPath = System.getenv("CI") != null
                 ? "/usr/local/bin/chromedriver"
                 : "web_driver/chromedriver";
 
         System.setProperty("webdriver.chrome.driver", driverPath);
 
+        // ChromeOptions import'u eklendi
         ChromeOptions options = new ChromeOptions();
 
-        // GitHub Actions (headless) için gerekli bayraklar
+        // CI ortamında headless mod aktif
         if (System.getenv("CI") != null) {
             options.addArguments("--headless=new");
             options.addArguments("--no-sandbox");
@@ -40,18 +38,17 @@ public class Driver {
 
         webDriver = new ChromeDriver(options);
 
-        // Timeout ayarları
-        long seconds = 10;
-        long milliseconds = 400;
-        long timeoutMillis = seconds * 1000 + milliseconds;
-
-        webDriverWait = new WebDriverWait(webDriver, Duration.ofMillis(timeoutMillis));
-        webDriverWait
-                .pollingEvery(Duration.ofMillis(500))
+        // WebDriverWait — Duration ile kullanılmalı (Selenium 4+)
+        webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(30));
+        webDriverWait.pollingEvery(Duration.ofMillis(500))
                 .ignoring(NoSuchElementException.class)
                 .ignoring(StaleElementReferenceException.class);
 
-        webDriver.manage().window().maximize();
+        // Headless dışı ortamlarda pencereyi büyüt
+        if (System.getenv("CI") == null) {
+            webDriver.manage().window().maximize();
+        }
+
         webDriver.navigate().to("https://www.hurriyet.com.tr/");
     }
 
