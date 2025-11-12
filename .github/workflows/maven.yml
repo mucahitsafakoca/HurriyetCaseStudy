@@ -1,0 +1,67 @@
+name: Run Gauge UI Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '23'
+
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install compatible ChromeDriver
+        run: |
+          # Chrome sürümünü al
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+' | head -1)
+          echo "Detected Chrome version: $CHROME_VERSION"
+
+          # ChromeDriver sürümü (major versiyon + uyumlu minör sürüm)
+          DRIVER_VERSION="142.0.7444.61"
+          echo "Using ChromeDriver version: $DRIVER_VERSION"
+
+          # ChromeDriver indir ve kur
+          wget -N "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/
+
+      - name: Install Gauge (latest stable)
+        run: |
+          curl -SsL https://downloads.gauge.org/stable | sudo sh
+          gauge -v
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Install dependencies
+        run: mvn clean install -DskipTests
+
+      - name: Run Gauge Tests
+        run: mvn test
+
+      - name: Show Gauge summary
+        run: |
+          echo "✅ Passed Scenarios:"
+          grep -o "passed: [0-9]*" logs/gauge.log || echo "No log found"
+          echo "❌ Failed Scenarios:"
+          grep -o "failed: [0-9]*" logs/gauge.log || echo "No log found"
