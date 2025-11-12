@@ -1,13 +1,13 @@
 package com.web.base.driver;
 
+import com.thoughtworks.gauge.BeforeSuite;
+import com.thoughtworks.gauge.AfterSuite;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
 
 import java.time.Duration;
 
@@ -47,12 +47,14 @@ public class Driver {
         }
 
         webDriver.navigate().to("https://www.hurriyet.com.tr/");
+        System.out.println("✅ WebDriver initialized successfully.");
     }
 
     @AfterSuite
     public void closeDriver() {
         if (webDriver != null) {
             webDriver.quit();
+            System.out.println("🧹 WebDriver closed successfully.");
         }
     }
 }
