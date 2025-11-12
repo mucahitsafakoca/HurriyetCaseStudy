@@ -22,6 +22,7 @@ Slider Case 2
 * Click active slider number
 * Switch to new window
 * Check if Urls are matched
+* Check if Urls are matched
 
 Slider Case 3
 ----------------
